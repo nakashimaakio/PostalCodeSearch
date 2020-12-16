@@ -26,26 +26,29 @@ class MainActivity : AppCompatActivity() {
     private fun postalCodeSearch() = GlobalScope.launch(Dispatchers.Main) {
         val http = HttpUtil()
         withContext(Dispatchers.Default) { http.httpGet(url + binding.postalCode.text) }.let {
-            try {
-                if (Json.parse(it).asObject().get("status").asInt() == 200) {
-                    val a = Json.parse(it).asObject().get("results").toString()
-                    if (a == "null") {
-                        binding.address.text = getString(R.string.no_data)
-                    } else {
-                        val result =
-                            Json.parse(it).asObject().get("results").asArray()[0].asObject()
-                        val address = result.get("address1").asString() +
-                                result.get("address2").asString() +
-                                result.get("address3").asString()
-                        binding.address.text = address
-                    }
-                } else {
-                    binding.address.text = Json.parse(it).asObject().get("message").asString()
-                }
+            binding.address.text = it.getAddress()
+        }
+    }
 
-            } catch (e: Exception) {
-                binding.address.text = getString(R.string.error)
+    private fun String?.getAddress(): String {
+        if (this == null) return getString(R.string.error)
+        try {
+            val json = Json.parse(this).asObject()
+            return if (json.get("status").asInt() == 200) {
+                if (json.get("results").toString() == "null") {
+                    getString(R.string.no_data)
+                } else {
+                    val result = json.get("results").asArray()[0].asObject()
+                    result.get("address1").asString() +
+                            result.get("address2").asString() +
+                            result.get("address3").asString()
+                }
+            } else {
+                json.get("message").asString()
             }
+
+        } catch (e: Exception) {
+            return getString(R.string.error)
         }
     }
 }
