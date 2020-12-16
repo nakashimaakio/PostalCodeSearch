@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
-    private val url = "https://qiita.com/api/v2/items/bf3e4e06022eebe8e3eb" //Qiita APIサービス
+    private val url = "http://zipcloud.ibsnet.co.jp/api/search?zipcode=1600000"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,10 +26,15 @@ class MainActivity : AppCompatActivity() {
         val http = HttpUtil()
         //Mainスレッドでネットワーク関連処理を実行するとエラーになるためBackgroundで実行
         withContext(Dispatchers.Default) { http.httpGet(url) }.let {
-            //minimal-jsonを使って　jsonをパース
-            val result = Json.parse(it).asObject()
-            val textView = findViewById<TextView>(R.id.Prefecture)
-            textView.text = result.get("likes_count").asInt().toString() + "LGTM!"
+            try {
+                //minimal-jsonを使って　jsonをパース
+                val result = Json.parse(it).asObject()
+                val textView = findViewById<TextView>(R.id.Prefecture)
+                textView.text =
+                    result.get("results").asArray()[0].asObject().get("address1").asString()
+            } catch (e: Exception) {
+
+            }
         }
     }
 }
