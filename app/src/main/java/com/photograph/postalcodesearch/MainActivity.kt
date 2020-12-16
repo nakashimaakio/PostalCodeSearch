@@ -18,7 +18,8 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.button.setOnClickListener { postalCodeSearch() }
+        //検索ボタンタップ
+        binding.searchButton.setOnClickListener { postalCodeSearch() }
     }
 
     /** 非同期処理で住所検索 */
@@ -26,11 +27,21 @@ class MainActivity : AppCompatActivity() {
         val http = HttpUtil()
         withContext(Dispatchers.Default) { http.httpGet(url + binding.postalCode.text) }.let {
             try {
-                val result = Json.parse(it).asObject().get("results").asArray()[0].asObject()
-                val address = result.get("address1").asString() +
-                        result.get("address2").asString() +
-                        result.get("address3").asString()
-                binding.address.text = address
+                if (Json.parse(it).asObject().get("status").asInt() == 200) {
+                    val a = Json.parse(it).asObject().get("results").toString()
+                    if (a == "null") {
+                        binding.address.text = getString(R.string.no_data)
+                    } else {
+                        val result =
+                            Json.parse(it).asObject().get("results").asArray()[0].asObject()
+                        val address = result.get("address1").asString() +
+                                result.get("address2").asString() +
+                                result.get("address3").asString()
+                        binding.address.text = address
+                    }
+                } else {
+                    binding.address.text = Json.parse(it).asObject().get("message").asString()
+                }
 
             } catch (e: Exception) {
                 binding.address.text = getString(R.string.error)

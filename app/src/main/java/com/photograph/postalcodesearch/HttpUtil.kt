@@ -10,13 +10,10 @@ class HttpUtil {
             .url(url)
             .build()
 
-        val response = HttpClient.instance.newCall(request).execute()
-        val body = response.body?.string()
-        return body
+        return HttpClient.instance.newCall(request).execute().body?.string()
     }
 }
 
 object HttpClient {
-    //OKHttp3はシングルトンで使う
     val instance = OkHttpClient()
 }
