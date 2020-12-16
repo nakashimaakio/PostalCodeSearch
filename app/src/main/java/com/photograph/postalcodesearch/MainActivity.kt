@@ -18,19 +18,22 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.button.setOnClickListener { onParallelGetButtonClick() }
+        binding.button.setOnClickListener { postalCodeSearch() }
     }
 
     /** 非同期処理で住所検索 */
-    private fun onParallelGetButtonClick() = GlobalScope.launch(Dispatchers.Main) {
+    private fun postalCodeSearch() = GlobalScope.launch(Dispatchers.Main) {
         val http = HttpUtil()
         withContext(Dispatchers.Default) { http.httpGet(url + binding.postalCode.text) }.let {
             try {
-                val result = Json.parse(it).asObject()
-                binding.Prefecture.text =
-                    result.get("results").asArray()[0].asObject().get("address1").asString()
+                val result = Json.parse(it).asObject().get("results").asArray()[0].asObject()
+                val address = result.get("address1").asString() +
+                        result.get("address2").asString() +
+                        result.get("address3").asString()
+                binding.address.text = address
+
             } catch (e: Exception) {
-                binding.Prefecture.text = "Error"
+                binding.address.text = getString(R.string.error)
             }
         }
     }
