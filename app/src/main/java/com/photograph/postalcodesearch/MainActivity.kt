@@ -8,6 +8,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class MainActivity : AppCompatActivity() {
     private val url = "http://zipcloud.ibsnet.co.jp/api/search?zipcode="
@@ -22,14 +24,25 @@ class MainActivity : AppCompatActivity() {
         binding.searchButton.setOnClickListener { postalCodeSearch() }
     }
 
-    /** 非同期処理で住所検索 */
+    /** 非同期処理で住所検索(通信エラー考慮) */
     private fun postalCodeSearch() = GlobalScope.launch(Dispatchers.Main) {
         val http = HttpUtil()
-        withContext(Dispatchers.Default) { http.httpGet(url + binding.postalCode.text) }.let {
-            binding.address.text = it.getAddress()
+        withContext(Dispatchers.Default) {
+            binding.address.text = http.httpGet(url + binding.postalCode.text).getAddress()
         }
     }
 
+    private suspend fun postalCodeSearchRequest(): String = suspendCoroutine { continuation ->
+        GlobalScope.launch(Dispatchers.Default) {
+            continuation.resume("OK")
+        }
+    }
+
+    /**
+     * 取得したjsonから住所を取得
+     *
+     * @return 住所の文字列
+     */
     private fun String?.getAddress(): String {
         if (this == null) return getString(R.string.error)
         try {
