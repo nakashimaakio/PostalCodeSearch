@@ -32,19 +32,32 @@ class MainActivity : AppCompatActivity() {
             .enqueue(object : retrofit2.Callback<AddressData> {
 
                 override fun onFailure(call: Call<AddressData>?, t: Throwable) {
-                    binding.address.text = "通信失敗"
+                    binding.address.text = getString(R.string.error)
                 }
 
                 override fun onResponse(
                     call: Call<AddressData>?,
                     response: Response<AddressData>
                 ) {
-                    binding.address.text =
-                        response.body()?.results?.firstOrNull()?.let {
-                            it.address1 + it.address2 + it.address3
-                        } ?: "読み込み失敗"
+                    binding.address.text = response.body()?.results?.firstOrNull()?.let {
+                        it.address1 + it.address2 + it.address3
+                    } ?: getString(R.string.error)
                 }
             })
+    }
+
+    private fun <S> create(serviceClass: Class<S>): S {
+        val gson = GsonBuilder()
+            .serializeNulls()
+            .create()
+
+        val retrofit = Retrofit.Builder()
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .baseUrl(url)
+            .client(httpBuilder.build())
+            .build()
+
+        return retrofit.create(serviceClass)
     }
 
     private val httpBuilder: OkHttpClient.Builder
@@ -68,18 +81,4 @@ class MainActivity : AppCompatActivity() {
 
             return httpClient
         }
-
-    private fun <S> create(serviceClass: Class<S>): S {
-        val gson = GsonBuilder()
-            .serializeNulls()
-            .create()
-
-        val retrofit = Retrofit.Builder()
-            .addConverterFactory(GsonConverterFactory.create(gson))
-            .baseUrl(url)
-            .client(httpBuilder.build())
-            .build()
-
-        return retrofit.create(serviceClass)
-    }
 }
