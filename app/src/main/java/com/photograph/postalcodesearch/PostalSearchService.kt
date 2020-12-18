@@ -2,10 +2,11 @@ package com.photograph.postalcodesearch
 
 import retrofit2.Call
 import retrofit2.http.GET
+import retrofit2.http.Query
 
 interface PostalSearchService {
-    @GET("search?zipcode=1600000")
-    fun address(): Call<AddressData>
+    @GET("search")
+    fun address(@Query("zipcode") postalCode: String): Call<AddressData>
 }
 
 data class AddressData(

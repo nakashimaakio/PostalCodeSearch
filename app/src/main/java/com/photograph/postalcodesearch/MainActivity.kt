@@ -27,19 +27,24 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun postalSearchRequest() {
-        val service: PostalSearchService = create(PostalSearchService::class.java)
-        service.address().enqueue(object : retrofit2.Callback<AddressData> {
-            override fun onFailure(call: Call<AddressData>?, t: Throwable) {
-                binding.address.text = "通信失敗"
-            }
+        create(PostalSearchService::class.java)
+            .address(binding.postalCode.text.toString())
+            .enqueue(object : retrofit2.Callback<AddressData> {
 
-            override fun onResponse(
-                call: Call<AddressData>?,
-                response: Response<AddressData>
-            ) {
-                binding.address.text = response.body()?.results?.firstOrNull()?.address1 ?: ""
-            }
-        })
+                override fun onFailure(call: Call<AddressData>?, t: Throwable) {
+                    binding.address.text = "通信失敗"
+                }
+
+                override fun onResponse(
+                    call: Call<AddressData>?,
+                    response: Response<AddressData>
+                ) {
+                    binding.address.text =
+                        response.body()?.results?.firstOrNull()?.let {
+                            it.address1 + it.address2 + it.address3
+                        } ?: "読み込み失敗"
+                }
+            })
     }
 
     private val httpBuilder: OkHttpClient.Builder
