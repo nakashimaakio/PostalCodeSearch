@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">検索</string>
+    <string name="app_name">郵便検索</string>
     <string name="search">検索</string>
     <string name="postal_code">郵便番号</string>
     <string name="error">エラーが発生しました</string>
