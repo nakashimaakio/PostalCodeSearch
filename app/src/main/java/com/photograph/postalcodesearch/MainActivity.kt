@@ -16,8 +16,6 @@ import java.util.concurrent.TimeUnit
 class MainActivity : AppCompatActivity() {
     private val url = "http://zipcloud.ibsnet.co.jp/api/"
     private lateinit var binding: ActivityMainBinding
-    private val service: IApiService = create(IApiService::class.java)
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,7 +27,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun postalSearchRequest() {
-        service.apiDemo().enqueue(object : retrofit2.Callback<AddressData> {
+        val service: PostalSearchService = create(PostalSearchService::class.java)
+        service.address().enqueue(object : retrofit2.Callback<AddressData> {
             override fun onFailure(call: Call<AddressData>?, t: Throwable) {
                 binding.address.text = "通信失敗"
             }
