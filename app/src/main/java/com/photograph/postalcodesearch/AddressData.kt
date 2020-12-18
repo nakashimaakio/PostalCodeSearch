@@ -1,7 +1,7 @@
 package com.photograph.postalcodesearch
 
 data class AddressData(
-    val message: Any,
+    val message: String,
     val results: List<Result>,
     val status: Int
 )
