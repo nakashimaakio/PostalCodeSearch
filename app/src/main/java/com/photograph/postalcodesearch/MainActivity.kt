@@ -26,24 +26,36 @@ class MainActivity : AppCompatActivity() {
         binding.searchButton.setOnClickListener { postalSearchRequest() }
     }
 
+    /** 郵便番号検索のリクエスト送信 + 取得した結果を画面に表示 */
     private fun postalSearchRequest() {
         create(PostalSearchService::class.java)
             .address(binding.postalCode.text.toString())
             .enqueue(object : retrofit2.Callback<AddressData> {
 
                 override fun onFailure(call: Call<AddressData>?, t: Throwable) {
-                    binding.address.text = getString(R.string.error)
+                    binding.address.text = getString(R.string.network_error)
                 }
 
                 override fun onResponse(
                     call: Call<AddressData>?,
                     response: Response<AddressData>
                 ) {
-                    binding.address.text = response.body()?.results?.firstOrNull()?.let {
-                        it.address1 + it.address2 + it.address3
-                    } ?: getString(R.string.error)
+                    binding.address.text = response.body()?.getAddress()
                 }
             })
+    }
+
+    /**
+     * レスポンスデータから画面表示用のテキストに変換
+     *
+     * @return 画面表示用のテキスト
+     */
+    private fun AddressData?.getAddress(): String {
+        if (this == null) return getString(R.string.error)
+        if (status != 200) return message ?: getString(R.string.error)
+        return results?.firstOrNull()?.let {
+            it.address1 + it.address2 + it.address3
+        } ?: getString(R.string.no_data)
     }
 
     private fun <S> create(serviceClass: Class<S>): S {
