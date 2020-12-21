@@ -58,6 +58,7 @@ class MainActivity : AppCompatActivity() {
         } ?: getString(R.string.no_data)
     }
 
+    /** サービスクラスの作成 */
     private fun <S> create(serviceClass: Class<S>): S {
         val gson = GsonBuilder()
             .serializeNulls()
@@ -72,6 +73,7 @@ class MainActivity : AppCompatActivity() {
         return retrofit.create(serviceClass)
     }
 
+    /** http通信準備 */
     private val httpBuilder: OkHttpClient.Builder
         get() {
             val httpClient = OkHttpClient.Builder()
